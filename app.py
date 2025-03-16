@@ -14,6 +14,7 @@ hide_github_icon = """
   visibility: hidden;
 }
 """
+st.markdown(hide_github_icon, unsafe_allow_html=True)
 # File uploader
 uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
 
