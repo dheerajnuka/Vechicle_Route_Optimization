@@ -5,7 +5,7 @@ import itertools
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 from datetime import timedelta
 import numpy as np
-
+import os
 def time_to_minutes(time_str):
     # print(time_str)
     hours, minutes = map(int, time_str.split(":"))
@@ -21,6 +21,8 @@ def minutes_to_24hr_time_string(minutes):
     return f"{hours:02}:{minutes:02}"
 
 def create_data_model_from_excel(excel_file="file_input.xlsx", num_vehicles=10, depot=0):
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Get current script directory
+    excel_file = os.path.join(base_dir, excel_file)  # Construct full path
     data = {}
     distance_matrix = pd.read_excel(excel_file, sheet_name='DistanceMatrix', index_col=0).values.astype(int).tolist()
     time_matrix = pd.read_excel(excel_file, sheet_name='TimeMatrix', index_col=0).values.tolist()
