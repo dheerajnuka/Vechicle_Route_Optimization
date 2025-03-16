@@ -20,58 +20,6 @@ def minutes_to_24hr_time_string(minutes):
     minutes = int((total_seconds % 3600) // 60)
     return f"{hours:02}:{minutes:02}"
 
-# def create_data_model_from_excel(DistanceMatrix,TimeMatrix,TimeWindows,StoreDemands,VehicleCapacities,time_matrix_df, num_vehicles=10, depot=0):
-#     data = {}
-#     # distance_matrix = pd.read_excel(excel_file, sheet_name='DistanceMatrix', index_col=0).values.astype(int).tolist()
-#     distance_matrix = DistanceMatrix.values.tolist()
-#     # time_matrix = pd.read_excel(excel_file, sheet_name='TimeMatrix', index_col=0).values.tolist()
-#     time_matrix = TimeMatrix.values.tolist()
-#     # time_windows_df = pd.read_excel(excel_file, sheet_name='TimeWindows')
-#     time_windows_df = TimeWindows
-#     # store_demands_df =pd.read_excel(excel_file, sheet_name='StoreDemands')
-#     store_demands_df =StoreDemands
-#     store_ids = time_windows_df['location'].tolist()  
-#     vehicle_capacities = VehicleCapacities['new_capacity'].values.tolist()
-#     unloading_times =StoreDemands['unloading_time'].values.tolist()
-#     store_vehicle_types =TimeWindows['lift_gate_types'].values.tolist()
-#     vehicle_types = VehicleCapacities['vehicle_types'].values.tolist()
-
-#     time_windows = []
-#     for _, row in time_windows_df.iterrows():
-#         start = time_to_minutes(row['start_time'])
-#         end = time_to_minutes(row['end_time'])
-#         if start <= end:
-#             time_windows.append((start, end))
-#         else:
-#             time_windows.append((start, 2879))
-#             time_windows.append((0, end))
-#     store_max_trailer_lengths=time_windows_df['store_max_trailer_lengths'].astype(float).tolist()
-#     vehicle_trailer_lengths = VehicleCapacities['vehicle_trailer_lengths'].astype(float).values.tolist()
-#     demands = store_demands_df['demand'].astype(int).tolist()
-#     # Add unloading time to the data from StoreDemands
-#     # unloading_time_df = time_windows_df.copy()
-#     # unloading_time_df['unloading_time'] = unloading_time_df['unloading_time']
-#     # unloading_times = unloading_time_df['unloading_time'].tolist()
-#     depot_start_time, depot_end_time = -1440, 2879
-#     time_windows[depot] = (depot_start_time, depot_end_time)
-#     data["distance_matrix"] = distance_matrix
-#     data["time_matrix"] = time_matrix
-#     data["num_vehicles"] = num_vehicles
-#     data["depot"] = depot
-#     data["demands"] = demands
-#     data["vehicle_capacities"] = vehicle_capacities
-#     data["time_windows"] = time_windows
-#     data["store_ids"] = store_ids
-#     data["unloading_times"] = unloading_times
-#     data['store_max_trailer_lengths']=store_max_trailer_lengths
-#     data['vehicle_trailer_lengths']=vehicle_trailer_lengths
-#     data['store_pref_vehicle_types']=store_vehicle_types
-#     data['vehicle_types']=vehicle_types
-#     # print(data)
-#     return data
-
-# def create_data_model_from_excel(excel_file="C:/Users/Dheerajnuka/Desktop/sai/CVS/testing_realtime/26th_file_input.xlsx", num_vehicles=10, depot=0):
-# def create_data_model_from_excel(excel_file="C:/Users/Dheerajnuka/Downloads/streamlit_route_app/file_input.xlsx", num_vehicles=10, depot=0):
 def create_data_model_from_excel(excel_file="file_input.xlsx", num_vehicles=10, depot=0):
     data = {}
     distance_matrix = pd.read_excel(excel_file, sheet_name='DistanceMatrix', index_col=0).values.astype(int).tolist()
@@ -116,111 +64,6 @@ def create_data_model_from_excel(excel_file="file_input.xlsx", num_vehicles=10, 
     data['store_pref_vehicle_types']=store_vehicle_types
     data['vehicle_types']=vehicle_types
     return data
-
-
-# def solve_routing_problem_with_unloading(data):
-#     """
-#     Solves the vehicle routing problem with dynamic unloading time for each store,
-#     reduces wait time, ensures driver break time after 10 hours of work,
-#     and includes mandatory break callbacks.
-#     """
-#     # Create the routing index manager
-#     manager = pywrapcp.RoutingIndexManager(len(data["distance_matrix"]), data["num_vehicles"], data["depot"])
-    
-#     # Create the routing model
-#     routing = pywrapcp.RoutingModel(manager)
-    
-#     # Define the distance callback
-#     def distance_callback(from_index, to_index):
-#         from_node = manager.IndexToNode(from_index)
-#         to_node = manager.IndexToNode(to_index)
-#         return data["distance_matrix"][from_node][to_node]
-
-#     # Register the distance callback
-#     distance_callback_index = routing.RegisterTransitCallback(distance_callback)
-#     routing.SetArcCostEvaluatorOfAllVehicles(distance_callback_index)
-
-#     # Define the time callback
-#     def time_callback(from_index, to_index):
-#         from_node = manager.IndexToNode(from_index)
-#         to_node = manager.IndexToNode(to_index)
-#         travel_time = data["time_matrix"][from_node][to_node]
-#         unloading_time = data["unloading_times"][from_node]
-#         total_time = travel_time + unloading_time
-#         return total_time
-
-#     # Register the time callback
-#     time_callback_index = routing.RegisterTransitCallback(time_callback)
-
-#     # Add the time dimension
-#     time_dimension_name = "Time"
-#     routing.AddDimension(
-#         time_callback_index,  # Callback index
-#         300,                  # Slack time
-#         14400,              # Maximum time (e.g., 10 hours + break time)
-#         False,              # Allow flexible start time
-#         time_dimension_name
-#     )
-    
-#     time_dimension = routing.GetDimensionOrDie(time_dimension_name)
-
-#     depot_index = manager.NodeToIndex(data["depot"])
-#     time_dimension.SlackVar(depot_index).SetValue(0)
-
-#     # Add time windows for each location
-#     for location_idx, (start, end) in enumerate(data["time_windows"]):
-#         index = manager.NodeToIndex(location_idx)
-#         time_dimension.CumulVar(index).SetRange(start, end)
-
-#     # Add capacity constraints
-#     def demand_callback(from_index):
-#         from_node = manager.IndexToNode(from_index)
-#         return data["demands"][from_node]
-
-#     demand_callback_index = routing.RegisterUnaryTransitCallback(demand_callback)
-#     routing.AddDimensionWithVehicleCapacity(
-#         demand_callback_index,  # Demand callback
-#         0,                      # Null capacity slack
-#         data["vehicle_capacities"],  # Vehicle capacities
-#         True,                   # Start cumul to zero
-#         "Capacity"
-#     )
-
-#     for vehicle_id in range(data["num_vehicles"]):
-#         start_index = routing.Start(vehicle_id)  # Get the start index for each vehicle
-#         time_dimension.SlackVar(start_index).SetValue(0)
-
-#     # Add penalties for missed locations
-#     penalty = 1000000000
-#     for location_idx in range(len(data["time_windows"])):
-#         index = manager.NodeToIndex(location_idx)
-#         routing.AddDisjunction([index], penalty)
-
-#     # Add trailer length constraints
-#     for store_idx in range(len(data["store_max_trailer_lengths"])):
-#         for vehicle_idx in range(data["num_vehicles"]):
-#             vehicle_length = data["vehicle_trailer_lengths"][vehicle_idx]
-#             max_length = data["store_max_trailer_lengths"][store_idx]
-#             if vehicle_length > max_length:
-#                 store_index = manager.NodeToIndex(store_idx)
-#                 routing.VehicleVar(store_index).RemoveValue(vehicle_idx)
-
-#     # Add vehicle type constraints
-#     for store_idx in range(len(data["store_pref_vehicle_types"])):
-#         for vehicle_idx in range(data["num_vehicles"]):
-#             vehicle_type = data["vehicle_types"][vehicle_idx]
-#             pref_types = data["store_pref_vehicle_types"][store_idx]
-#             if vehicle_type not in pref_types:
-#                 store_index = manager.NodeToIndex(store_idx)
-#                 routing.VehicleVar(store_index).RemoveValue(vehicle_idx)
-
-#     # Set search parameters
-#     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-#     search_parameters.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-#     search_parameters.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-#     search_parameters.time_limit.seconds = 60
-#     solution = routing.SolveWithParameters(search_parameters)
-#     return data, solution, routing, manager, time_dimension
 
 def solve_routing_problem_with_unloading(data):
     """
@@ -463,19 +306,6 @@ def save_solution_to_excel(data, manager, routing, solution, time_dimension, out
     output_df = output_df.groupby("Vehicle ID").filter(lambda x: len(x) > 2)
     return output_df
 
-# # Get user input for dispatch date
-# # dispatch_date = input("Enter the dispatch date (YYYY-MM-DD): ")
-
-
-# if solution:
-#     output_df = save_solution_to_excel(data, manager, routing, solution, time_dimension, 
-#                                        output_file='vr_real_data_v1_Nov_1_updated.xlsx',
-#                                        dispatch_date=dispatch_date)
-# else:
-#     print("No solution found with the adjusted strategy.")
-
-# output_df
-
 def add_suggested_store_open_time(df):
     """
     Add a column "Suggested Store Open Time" where "Wait Time" is greater than zero.
@@ -631,42 +461,6 @@ def vehicle_summary_calculation(updated_df,VehicleCapacities):
     vehicle_summary.drop(columns=['vehicle_id'], inplace=True)
     return vehicle_summary
 
-# def process_routes(df):
-#     DistanceMatrix,TimeMatrix,TimeWindows,StoreDemands,VehicleCapacities,time_matrix_df,coordinates_df=generate_input_file(df)
-#     # data=create_data_model_from_excel(DistanceMatrix,TimeMatrix,TimeWindows,StoreDemands,VehicleCapacities,time_matrix_df,num_vehicles=40)
-#     data=create_data_model_from_excel(num_vehicles=40)
-#     # print(data)
-#     data, solution, routing, manager, time_dimension=solve_routing_problem_with_unloading(data)
-
-#     if solution:
-#         for vehicle_id in range(data["num_vehicles"]):
-#             print(f"Route for vehicle {vehicle_id}:")
-#             index = routing.Start(vehicle_id)
-#             route = []
-#             while not routing.IsEnd(index):
-#                 node = manager.IndexToNode(index)
-#                 route.append(node)
-#                 index = solution.Value(routing.NextVar(index))
-#             route.append(manager.IndexToNode(index))
-#             print(" -> ".join(map(str, route)))
-#     else:
-#         print("No solution found!")
-
-#     # Print total cost
-#     # print(f"Total cost: {solution.ObjectiveValue()}")
-#     output_df=save_solution_to_excel(data, manager, routing, solution, time_dimension, output_file='vr_real_data_v1_Nov_1_updated.xlsx',
-#                            break_after_minutes=10000, break_duration_minutes=5, depot_id=15501, dispatch_date=None)
-#     # output_df.to_csv('output_df.csv',index=False)
-#     updated_df = add_suggested_store_open_time(output_df)
-#     updated_df["Store ID"] = updated_df["Store ID"].replace(15501, "DC")
-#     final_df=adjust_arrival_times(updated_df)
-#     full_final_df= layover_logics(final_df)
-#     vehicle_summary=vehicle_summary_calculation(final_df,VehicleCapacities)
-#     full_final_df1=get_coordinates(full_final_df,coordinates_df)
-#     # vehicle_summary.to_csv('vehicle_summary.csv',index=False)
-#     # full_final_df.to_csv('full_final_df.csv',index=False)
-#     return full_final_df1,vehicle_summary
-
 def minutes_to_time(minutes):
     return f"{minutes // 60:02d}:{minutes % 60:02d}"
 
@@ -788,38 +582,16 @@ def layover_logics(df):
     return df[["Vehicle ID","Store ID","Location","Cube","Remaining Cube","Arrival Time","departure_time","Suggested Store Open Time","Adjusted Arrival Time","Minutes_of_service","layover_route","layover_after","layover_before","Layover_adjusted_arrival_time","Layover_adjusted_departure_time","original_wait_time","New Wait Time","Window Start","Window End","Distance to Next","Travel Time to Next","Wait Time","Unloading Time","Validation","Max Trailer Length (Store)","Vehicle Trailer Length","Store Preferred Vehicle Type","Vehicle Type","Dispatch Date"]]
 
 def get_coordinates(final_df,coordinates_df):
-    # print(final_df)
-    # file_path = 'C:/Users/Dheerajnuka/Downloads/streamlit_route_app/utils/Service Locations All Stores Logistics Planning Export 3.xlsx'
-    # main_df = pd.read_excel(file_path)
-    # main_df=main_df[["ID", "Description",'Window Open', 'Window Close', 'Coordinate','Country', 'State', 'City','Max Trailer Length','Equipment Type Restrictions']]
-    # print(main_df.columns)
-    # main_df.columns = [col.lower().replace(" ", "_") for col in main_df.columns]
-    # main_df.reset_index(drop=True)
     coordinates_df['Store'] = coordinates_df["id"].str.extract(r'(\d+)').fillna(0).astype(int).astype(str)
     coordinates_df = pd.concat([ pd.DataFrame({
         'id': ['DC'],
         'coordinate': ['(40.026330, -79.083500)'],
         'Store': ['DC']  # Ensure this matches the exact column name
     }),coordinates_df], ignore_index=True)
-    # print(coordinates_df)
-    # # final_df['Max Trailer Length (Store)']=final_df['Max Trailer Length (Store)'].astype(float)
-    # final_df['Max Trailer Length (Store)'] = final_df['Max Trailer Length (Store)'].replace('N/A', np.nan).astype(float)
-    # main_df.to_csv('main_df.csv',index=False)
-    # print(main_df[['Store','coordinate']]
-    # final_df['Store ID'] = final_df['Store ID'].str.strip()
-    # coordinates_df['Store'] = coordinates_df['Store'].str.strip()
-    # final_df['Store ID'] = final_df['Store ID'].astype(str)
-    # final_df['Store ID']=final_df['Store ID'].str.strip()
     coordinates_df['Store'] = coordinates_df['Store'].str.strip()
     final_df['Store ID'] = final_df['Store ID'].astype(str).str.strip()
     coordinates_df['Store'] = coordinates_df['Store'].astype(str).str.strip()
-    # print(final_df)
-    # print(coordinates_df)
-    
     full_final_df=pd.merge(final_df,coordinates_df[['Store','coordinate']],left_on='Store ID',right_on='Store',how='inner')
-    # full_final_df = final_df[['Store ID']].merge(coordinates_df[['Store', 'coordinate']], left_on='Store ID', right_on='Store', how='inner')
-    # print(full_final_df)
-    # full_final_df.to_csv('full_final_df.csv',index=False)
     return full_final_df
 
 
