@@ -633,7 +633,12 @@ def classify_store_time(start_time, end_time):
 
 
 def generate_input_file(df):
-    file_path = 'C:/Users/Dheerajnuka/Downloads/streamlit_route_app/utils/Service Locations All Stores Logistics Planning Export 3.xlsx'
+    # file_path = 'C:/Users/Dheerajnuka/Downloads/streamlit_route_app/utils/Service Locations All Stores Logistics Planning Export 3.xlsx'
+    base_dir = os.path.dirname(os.path.abspath(__file__))  
+
+    # Construct the relative path inside the project folder
+    file_name = "utils/Service Locations All Stores Logistics Planning Export 3.xlsx"
+    file_path = os.path.join(base_dir, file_name)
     main_df = pd.read_excel(file_path)
     main_df['Equipment Type Restrictions']= main_df['Equipment Type Restrictions'].str.lower()
     
@@ -704,9 +709,11 @@ def generate_input_file(df):
     time_matrix_df.columns=['store_id','distance']
     time_matrix_df["Haul Type"] = time_matrix_df["distance"].apply(lambda x: "Long Haul" if x >= 250 else "Short Haul")
     
-    dmd_file_path = 'C:/Users/Dheerajnuka/Downloads/streamlit_route_app/utils/YTD Store Volume Average.xlsx'  # Placeholder path
+    # dmd_file_path = 'C:/Users/Dheerajnuka/Downloads/streamlit_route_app/utils/YTD Store Volume Average.xlsx'  # Placeholder path
+    dmd_file_name = "utils/Service Locations All Stores Logistics Planning Export 3.xlsx"
+    dmd_file_path = os.path.join(base_dir, dmd_file_name)
     dmd_df = pd.read_excel(dmd_file_path, sheet_name='BY Store').drop(['AvgOfWeight', 'AvgOfPallet'], axis = 1)
-
+    
     # Merge based on the 'ID' column (inner join by default)
     TimeWindows = pd.merge(main_df[['Store','window_open','window_close','max_trailer_length']], dmd_df[['Store']], on='Store', how='inner')  # Options: 'left', 'right', 'outer', 'inner'
     TimeWindows.columns = ['location', 'start_time','end_time','store_max_trailer_lengths']
