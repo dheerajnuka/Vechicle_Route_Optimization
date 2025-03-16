@@ -25,7 +25,8 @@ def get_road_route(start, waypoints, end, api_key):
 # Function to render map
 def render_map(df, selected_vehicle, max_drive_time=600, api_key='AIzaSyDB-5cPWG__H3J38sloPutWcPLEgb1LYpM'):
     df = df.copy()
-    df["coordinate"] = df["coordinate"].astype(str).fillna("")
+    # df.columns = [col.lower().replace(" ", "_") for col in df.columns]
+    df["coordinate"] = df["Coordinate"].astype(str).fillna("")
     df["coordinate"] = df["coordinate"].str.replace(r"[()]", "", regex=True)
     df["Store ID"] = df["Store ID"].astype(str)
     df[["latitude", "longitude"]] = df["coordinate"].str.split(",", expand=True).apply(pd.to_numeric, errors="coerce")
