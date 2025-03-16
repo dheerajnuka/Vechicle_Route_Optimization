@@ -22,7 +22,8 @@ def minutes_to_24hr_time_string(minutes):
 
 def create_data_model_from_excel(excel_file="file_input.xlsx", num_vehicles=10, depot=0):
     base_dir = os.path.dirname(os.path.abspath(__file__))  # Get current script directory
-    excel_file = os.path.join(base_dir, excel_file)  # Construct full path
+    parent_dir = os.path.dirname(base_dir)
+    excel_file = os.path.join(parent_dir, excel_file)  # Construct full path
     data = {}
     distance_matrix = pd.read_excel(excel_file, sheet_name='DistanceMatrix', index_col=0).values.astype(int).tolist()
     time_matrix = pd.read_excel(excel_file, sheet_name='TimeMatrix', index_col=0).values.tolist()
@@ -637,7 +638,7 @@ def generate_input_file(df):
     base_dir = os.path.dirname(os.path.abspath(__file__))  
 
     # Construct the relative path inside the project folder
-    file_name = "utils/Service Locations All Stores Logistics Planning Export 3.xlsx"
+    file_name = "Service Locations All Stores Logistics Planning Export 3.xlsx"
     file_path = os.path.join(base_dir, file_name)
     main_df = pd.read_excel(file_path)
     main_df['Equipment Type Restrictions']= main_df['Equipment Type Restrictions'].str.lower()
@@ -710,7 +711,7 @@ def generate_input_file(df):
     time_matrix_df["Haul Type"] = time_matrix_df["distance"].apply(lambda x: "Long Haul" if x >= 250 else "Short Haul")
     
     # dmd_file_path = 'C:/Users/Dheerajnuka/Downloads/streamlit_route_app/utils/YTD Store Volume Average.xlsx'  # Placeholder path
-    dmd_file_name = "utils/Service Locations All Stores Logistics Planning Export 3.xlsx"
+    dmd_file_name = "YTD Store Volume Average.xlsx"
     dmd_file_path = os.path.join(base_dir, dmd_file_name)
     dmd_df = pd.read_excel(dmd_file_path, sheet_name='BY Store').drop(['AvgOfWeight', 'AvgOfPallet'], axis = 1)
     
