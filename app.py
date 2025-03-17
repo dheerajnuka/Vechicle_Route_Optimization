@@ -9,12 +9,12 @@ from streamlit_folium import folium_static
 
 st.title("📍 Route Mapping Application")
 st.write("Upload a CSV file to visualize routes.")
-hide_github_icon = """
-#GithubIcon {
-  visibility: hidden;
-}
-"""
-st.markdown(hide_github_icon, unsafe_allow_html=True)
+# hide_github_icon = """
+# #GithubIcon {
+#   visibility: hidden;
+# }
+# """
+# st.markdown(hide_github_icon, unsafe_allow_html=True)
 # File uploader
 uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
 
