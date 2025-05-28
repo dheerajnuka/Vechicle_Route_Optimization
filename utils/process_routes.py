@@ -5,7 +5,10 @@ import itertools
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 from datetime import timedelta
 import numpy as np
-import os
+import requests
+import warnings
+warnings.filterwarnings("ignore")
+
 def time_to_minutes(time_str):
     # print(time_str)
     hours, minutes = map(int, time_str.split(":"))
@@ -73,9 +76,6 @@ def minutes_to_24hr_time_string(minutes):
 # def create_data_model_from_excel(excel_file="C:/Users/Dheerajnuka/Desktop/sai/CVS/testing_realtime/26th_file_input.xlsx", num_vehicles=10, depot=0):
 # def create_data_model_from_excel(excel_file="C:/Users/Dheerajnuka/Downloads/streamlit_route_app/file_input.xlsx", num_vehicles=10, depot=0):
 def create_data_model_from_excel(excel_file="file_input.xlsx", num_vehicles=10, depot=0):
-    base_dir = os.path.dirname(os.path.abspath(__file__))  # Get current script directory
-    parent_dir = os.path.dirname(base_dir)
-    excel_file = os.path.join(parent_dir, excel_file)  # Construct full path
     data = {}
     distance_matrix = pd.read_excel(excel_file, sheet_name='DistanceMatrix', index_col=0).values.astype(int).tolist()
     time_matrix = pd.read_excel(excel_file, sheet_name='TimeMatrix', index_col=0).values.tolist()
@@ -969,11 +969,9 @@ def generate_input_file(df):
     df['Lift_Gate_Types'] = df['Equipment Type Restrictions'].apply(distinct_lift_gate_types)
     df[df['storeID'].isin(list(df['storeID']))]
     df=df[df['storeID'].isin(list(df['storeID']))]
-
     df.columns = [col.lower().replace(" ", "_") for col in df.columns]
-    # Extract coordinates from the 'coordinatge' column as tuples
+    # Extract coordinates from the 'coordinate' column as tuples
     coordinates = df['coordinate'].str.extract(r'\(([^,]+),([^)]+)\)').astype(float).apply(tuple, axis=1).tolist()
-
     # Initialize an empty distance matrix DataFrame
     DistanceMatrix = pd.DataFrame(index=range(len(coordinates)), columns=range(len(coordinates)))
 
@@ -1046,9 +1044,35 @@ def generate_input_file(df):
         VehicleCapacities.to_excel(writer, sheet_name='VehicleCapacities')
         time_matrix_df.to_excel(writer,sheet_name='houl_types')
 
+
     return DistanceMatrix,TimeMatrix,TimeWindows,StoreDemands,VehicleCapacities,time_matrix_df,df[['storeid','coordinate']]
 
-def process_routes(df):
+
+def get_coordinates1(address):
+    base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+    params = {
+        "address": address,
+        "key": 'AIzaSyDB-5cPWG__H3J38sloPutWcPLEgb1LYpM'  # Make sure this is kept secure
+    }
+    try:
+        response = requests.get(base_url, params=params)
+        data = response.json()
+        if data['status'] == 'OK':
+            location = data['results'][0]['geometry']['location']
+            lat = round(location['lat'], 7)
+            lng = round(location['lng'], 7)
+            return (lat, lng)
+        else:
+            return None
+    except Exception as e:
+        print(f"Error for address '{address}': {e}")
+        return None
+
+
+def process_routes(df1):
+    df1["Coordinate"] = df1['address'].apply(lambda addr: get_coordinates1(addr))
+    df1.to_csv('coordinates.csv', index=False)
+    df=pd.read_csv('coordinates.csv')
     DistanceMatrix,TimeMatrix,TimeWindows,StoreDemands,VehicleCapacities,time_matrix_df,coordinates_df=generate_input_file(df)
     # data=create_data_model_from_excel(DistanceMatrix,TimeMatrix,TimeWindows,StoreDemands,VehicleCapacities,time_matrix_df,num_vehicles=40)
     data=create_data_model_from_excel(num_vehicles=40)
