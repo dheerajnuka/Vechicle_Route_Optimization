@@ -8,6 +8,7 @@ import numpy as np
 import requests
 import warnings
 warnings.filterwarnings("ignore")
+import streamlit as st
 
 def time_to_minutes(time_str):
     # print(time_str)
@@ -1052,7 +1053,7 @@ def get_coordinates1(address):
     base_url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
         "address": address,
-        "key": 'AIzaSyDB-5cPWG__H3J38sloPutWcPLEgb1LYpM'  # Make sure this is kept secure
+        "key": st.secrets["API_KEY"]  # Make sure this is kept secure
     }
     try:
         response = requests.get(base_url, params=params)
