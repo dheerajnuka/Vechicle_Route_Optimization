@@ -24,7 +24,20 @@ if uploaded_file is not None:
 
     # Process routes
     full_final_df,vehicle_summary = process_routes(df)
-    st.write("### Routes Data", full_final_df)
+    cols_to_drop = [
+        "Location",
+        "Cube",
+        "layover_after",
+        "layover_before",
+        "Layover_adjusted_arrival_time",
+        "Layover_adjusted_departure_time",
+        "original_wait_time",
+        "storeID"
+    ]
+
+    # Drop them (ignore if a column doesn’t exist)
+    full_final_df1 = full_final_df.drop(columns=cols_to_drop, errors="ignore")
+    st.write("### Routes Data", full_final_df1)
     st.write("### Vehicle Summary", vehicle_summary)
 
     # Render map
