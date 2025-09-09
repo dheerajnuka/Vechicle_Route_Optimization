@@ -37,8 +37,15 @@ if uploaded_file is not None:
 
     # Drop them (ignore if a column doesn’t exist)
     full_final_df1 = full_final_df.drop(columns=cols_to_drop, errors="ignore")
+    cols_to_drop1= [
+        "End Time in min",
+        "Start Time in min",
+        "capacity",
+        "new_capacity"
+    ]
+    vehicle_summary1= vehicle_summary.drop(columns=cols_to_drop1,errors='ignore')
     st.write("### Routes Data", full_final_df1)
-    st.write("### Vehicle Summary", vehicle_summary)
+    st.write("### Vehicle Summary", vehicle_summary1)
 
     # Render map
     st.write("### Route Map")
