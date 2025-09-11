@@ -49,3 +49,28 @@ This table documents each column in the route output.
 - `New Wait Time = max(0, Window Start − Adjusted Arrival Time)`
 - `departure_time = Adjusted Arrival Time + Minutes_of_service`
 - `Remaining Cube(next) = Remaining Cube(current) − Cube` (deliveries)
+
+
+
+## Vehicle Summary — Data Dictionary
+
+This table documents the vehicle-level (per-route) summary fields.
+
+| Column name | Description |
+|---|---|
+| Vehicle ID | Unique identifier for the vehicle whose route summary this is. |
+| Total Stores | Number of stops/locations served on the route. |
+| Start Time | Planned departure time from the depot or first location. |
+| End Time | Planned finish/return time for the route. |
+| Total Distance | Total planned driving distance for the route (km or mi). |
+| Total Load | Total volume/weight serviced on the route (e.g., sum of delivered cube/weight). |
+| Total Wait Time | Aggregate waiting time across all stops (arrivals before window/opening). |
+| Vehicle Type | Actual vehicle class used (e.g., 26’ box, reefer, tail-lift). |
+| Time Travel (hours) | Total driving time for the route in hours. |
+| capacity | Vehicle’s rated capacity (volume or weight) at dispatch. |
+| new_capacity | Remaining unused capacity at route end: `capacity − Total Load`. |
+| vehicle_types | Allowed/compatible vehicle categories considered by the model (if modeled as a set). |
+| Trailer Utilization (%) | Percent of capacity used: `(Total Load / capacity) × 100`. |
+| Haul Type | Route classification (e.g., linehaul, local, backhaul, milk-run). |
+
+> **Notes:** Units should be stated consistently for distance (km/mi) and load (volume/weight). Time fields should be in a single timezone and format (e.g., ISO 8601).
