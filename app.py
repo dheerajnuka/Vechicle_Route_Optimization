@@ -26,7 +26,6 @@ if uploaded_file is not None:
     full_final_df,vehicle_summary = process_routes(df)
     cols_to_drop = [
         "Location",
-        "Cube",
         "layover_after",
         "layover_before",
         "Layover_adjusted_arrival_time",
