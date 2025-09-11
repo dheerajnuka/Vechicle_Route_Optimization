@@ -11,7 +11,7 @@ st.title("📍 Route Mapping Application")
 
 # --- README link ---
 README_URL = "https://github.com/dheerajnuka/Vechicle_Route_Optimization/blob/main/README.md"
-st.caption("📘 Need help? Read the project README for output route columns,vehicle summary columns")
+st.caption("📘 Need help? Read the project README for output route,vehicle summary columns and sample CSV file")
 if hasattr(st, "link_button"):  # Streamlit >= 1.25
     st.link_button("Open README", README_URL)
 else:
