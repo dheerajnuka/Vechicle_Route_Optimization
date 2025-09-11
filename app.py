@@ -45,7 +45,7 @@ if uploaded_file is not None:
         "new_capacity"
     ]
     vehicle_summary1= vehicle_summary.drop(columns=cols_to_drop1,errors='ignore')
-    st.write("### Routes Data", full_final_df1)
+    st.write("### Routes Data", full_final_df2)
     st.write("### Vehicle Summary", vehicle_summary1)
 
     # Render map
