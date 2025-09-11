@@ -37,12 +37,10 @@ if uploaded_file is not None:
 
     # Drop them (ignore if a column doesn’t exist)
     full_final_df1 = full_final_df.drop(columns=cols_to_drop, errors="ignore")
-    full_final_df2= full_final_df1[["Vehicle ID","Store ID","Cube","Remaining Cube","Arrival Time","departure_time","Distance to Next","Travel Time to Next","Unloading Time","Suggested Store Open Time","Adjusted Arrival Time","Minutes_of_service","layover_route","New Wait Time","Window Start","Window End","Validation","Max Trailer Length (Store)","Vehicle Trailer Length","Store Preferred Vehicle Type","Vehicle Type","Dispatch Date","Coordinate",]]
+    full_final_df2= full_final_df1[["Vehicle ID","Store ID","Cube","Remaining Cube","Arrival Time","departure_time","Distance to Next","Travel Time to Next","Unloading Time","Suggested Store Open Time","Adjusted Arrival Time","Minutes_of_service","layover_route","New Wait Time","Window Start","Window End","Validation","Max Trailer Length (Store)","Vehicle Trailer Length","Store Preferred Vehicle Type","Vehicle Type","Dispatch Date","Coordinate"]]
     cols_to_drop1= [
         "End Time in min",
-        "Start Time in min",
-        "capacity",
-        "new_capacity"
+        "Start Time in min"
     ]
     vehicle_summary1= vehicle_summary.drop(columns=cols_to_drop1,errors='ignore')
     st.write("### Routes Data", full_final_df2)
